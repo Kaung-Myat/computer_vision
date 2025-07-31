@@ -14,4 +14,7 @@ from opencv_exe import Shape, Image, Color
 color = Color()
 # color.color_transform()
 # Histogram
-color.histogram()
+# color.histogram()
+
+# Gaussian Blur
+color.gaussian_blur()

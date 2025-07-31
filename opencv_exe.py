@@ -101,3 +101,26 @@ class Color:
             plt.plot(hist,color=col)
             plt.xlim([0,256])
         plt.show()
+
+    @staticmethod
+    def gaussian_blur():
+        gray_image = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+
+        # Apply Gaussian blur to reduce noise and avoid false edge detection
+        blurred_image = cv.GaussianBlur(gray_image,(5,5),0)
+
+        #Apply canny edge detection
+        edges = cv.Canny(blurred_image,threshold1=100,threshold2=200)
+
+        #show the original and the edge-detected images
+        plt.subplot(1,2,1)
+        plt.title('Original Image')
+        plt.imshow(cv.cvtColor(img,cv.COLOR_BGR2RGB))
+        plt.axis('off') # Hide x and y axis
+
+        plt.subplot(1,2,2)
+        plt.title('Edge Detection')
+        plt.imshow(edges,cmap='gray')
+        plt.axis('off')
+
+        plt.show()
