@@ -10,5 +10,8 @@ from opencv_exe import Shape, Image, Color
 # shape = Shape()
 # shape.rotate_img()
 
+# Color Transformation
 color = Color()
-color.color_transform()
+# color.color_transform()
+# Histogram
+color.histogram()

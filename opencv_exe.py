@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from matplotlib import pyplot as plt
 
 img = cv.imread("assets/robot.jpeg")
 height, width = img.shape[:2]
@@ -92,6 +93,11 @@ class Color:
         cv.imshow('Erosion',erosion)
         cv.imshow('Dilation',dilation)
 
-
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+    @staticmethod
+    def histogram():
+        color = ('b','g','r')
+        for i,col in enumerate(color):
+            hist = cv.calcHist([img],[i],None,[256],[0,256])
+            plt.plot(hist,color=col)
+            plt.xlim([0,256])
+        plt.show()
