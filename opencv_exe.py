@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
+import glob
 
 img = cv.imread("assets/robot.jpeg")
 height, width = img.shape[:2]
@@ -124,3 +125,85 @@ class Color:
         plt.axis('off')
 
         plt.show()
+
+    @staticmethod
+    def image_threshold():
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        image_filter = cv.medianBlur(gray,5)
+        th1 = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_MEAN_C,cv.THRESH_BINARY,11,2)
+        th2 = cv.adaptiveThreshold(gray,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY,11,2)
+
+        titles = ['Original','Median Filter','Mean Thresholding','Gaussian Thresholding']
+        images = [gray,image_filter,th1,th2]
+        for i in range(4):
+            plt.subplot(2,2,i+1)
+            plt.imshow(images[i],'gray')
+
+            plt.title(titles[i])
+            plt.xticks([]), plt.yticks([])
+        plt.show()
+
+import cv2 as cv
+
+class Video:
+    @staticmethod
+    def video_capture():
+        cam = cv.VideoCapture(0, cv.CAP_DSHOW)
+
+        if not cam.isOpened():
+            print("Error: Cannot open camera")
+            return
+
+        while True:
+            ret, frame = cam.read()
+            if not ret:
+                print("Error: Cannot retrieve frame")
+                break
+            video_color_reduce = cv.cvtColor(frame,cv.COLOR_BGR2RGB)
+            cv.imshow("Video Capture", video_color_reduce)
+
+            if cv.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cam.release()
+        cv.destroyAllWindows()
+
+    @staticmethod
+    @staticmethod
+    def img_to_video():
+        # Step 1: Load all PNG images from the folder (sorted by filename order)
+        images = sorted(glob.glob("assets/video_capture_images/*.png"))
+
+        if not images:
+            print("Error: No images found in folder.")
+            return
+
+        # Step 2: Read the first image to get width & height
+        frame = cv.imread(images[0])
+        height, width, _ = frame.shape
+
+        # Step 3: Define the video writer (filename, codec, fps, frame_size)
+        out = cv.VideoWriter(
+            "output.avi",
+            cv.VideoWriter_fourcc(*'XVID'),  # Corrected typo here
+            24,  # Frames per second
+            (width, height)  # Frame size
+        )
+
+        # Step 4: How many times to repeat each image (for slower playback)
+        repeat_count = 10
+
+        # Step 5: Loop over all images
+        for img_path in images:
+            img = cv.imread(img_path)  # Corrected from "img - ..."
+            if img is None:
+                print(f"Warning: Could not read {img_path}, skipping...")
+                continue
+
+            # Repeat each frame multiple times to control duration
+            for _ in range(repeat_count):
+                out.write(img)
+
+        # Step 6: Release video writer
+        out.release()
+        print("Video saved as output.avi")

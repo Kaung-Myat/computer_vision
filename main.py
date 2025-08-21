@@ -1,4 +1,4 @@
-from opencv_exe import Shape, Image, Color
+from opencv_exe import Shape, Image, Color, Video
 
 # OpenCv Image read write methods
 # image = Image()
@@ -17,4 +17,11 @@ color = Color()
 # color.histogram()
 
 # Gaussian Blur
-color.gaussian_blur()
+# color.gaussian_blur()
+
+# image threshold
+# color.image_threshold()
+
+
+video = Video()
+video.img_to_video()
