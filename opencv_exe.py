@@ -214,40 +214,32 @@ class Detection:
     def image_face_detection():
         # The name of the folder containing the images
         IMAGE_FOLDER = 'assets/images'
-
-        # Get the image filename from command line arguments
-        # If no filename is given, use a default one
         try:
             image_filename = sys.argv[1]
         except IndexError:
-            image_filename = 'people-2.jpg'
+            image_filename = 'person.jpg'  # Default image
 
-        # Construct the full path to the image
         image_path = os.path.join(IMAGE_FOLDER, image_filename)
 
-        # Path to the pre-trained Haar Cascade XML file in the root folder
-        cascade_path = 'haarcascade_frontalface_default.xml'
+        # Paths to all Haar Cascade XML files
+        face_cascade_path = 'haarcascade_frontalface_default.xml'
+        eye_cascade_path = 'haarcascade_eye.xml'
+        smile_cascade_path = 'haarcascade_smile.xml'
 
-        # Create the Haar Cascade classifier
-        face_cascade = cv.CascadeClassifier(cascade_path)
+        # --- 2. Load All Classifiers ---
+        face_cascade = cv.CascadeClassifier(face_cascade_path)
+        eye_cascade = cv.CascadeClassifier(eye_cascade_path)
+        smile_cascade = cv.CascadeClassifier(smile_cascade_path)
 
-        # Read the image from the constructed path
+        # --- 3. Load Image and Convert to Grayscale ---
         image = cv.imread(image_path)
-
-        # Check if the image and classifier were loaded correctly
         if image is None:
             print(f"❌ Error: Could not load image from path: {image_path}")
-            print("Please ensure the file exists and the path is correct.")
-            sys.exit()
-        if face_cascade.empty():
-            print(f"❌ Error: Could not load face cascade from path: {cascade_path}")
-            print("Please ensure 'haarcascade_frontalface_default.xml' is in the root project folder.")
             sys.exit()
 
-        # Convert the image to grayscale for the detector
         gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 
-        # Perform the face detection
+        # --- 4. Detect Faces ---
         faces = face_cascade.detectMultiScale(
             gray_image,
             scaleFactor=1.1,
@@ -256,13 +248,41 @@ class Detection:
         )
         print(f"✅ Found {len(faces)} faces in '{image_filename}'!")
 
-        # Loop over the found faces and draw a green rectangle around each one
+        # --- 5. Loop Through Faces and Detect Features within Each Face ---
+        # Loop over each detected face (x, y, width, height)
         for (x, y, w, h) in faces:
+            # Draw a green rectangle around the face
             cv.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        # Display the final image in a window
-        cv.imshow("Faces Detected", image)
+            # Create a Region of Interest (ROI) for the face in both color and grayscale
+            # This means we will only search for eyes and mouths inside this face region
+            roi_gray = gray_image[y:y + h, x:x + w]
+            roi_color = image[y:y + h, x:x + w]
 
-        # Wait for a key press to close the window
+            # Detect eyes within the face ROI
+            eyes = eye_cascade.detectMultiScale(
+                roi_gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(20, 20)
+            )
+            # Draw blue rectangles around the eyes
+            for (ex, ey, ew, eh) in eyes:
+                cv.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (255, 0, 0), 2)
+
+            # Detect mouth (smile) within the face ROI
+            smiles = smile_cascade.detectMultiScale(
+                roi_gray,
+                scaleFactor=1.7,  # Scale factor is often higher for smiles
+                minNeighbors=20,
+                minSize=(25, 25)
+            )
+            # Draw a red rectangle around the mouth
+            for (sx, sy, sw, sh) in smiles:
+                cv.rectangle(roi_color, (sx, sy), (sx + sw, sy + sh), (0, 0, 255), 2)
+
+        # --- 6. Display the final image ---
+
+        cv.imshow("Face and Feature Detection", image)
         cv.waitKey(0)
         cv.destroyAllWindows()
