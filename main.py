@@ -1,4 +1,4 @@
-from opencv_exe import Shape, Image, Color, Video
+from opencv_exe import Shape, Image, Color, Video, Detection
 
 # OpenCv Image read write methods
 # image = Image()
@@ -11,7 +11,7 @@ from opencv_exe import Shape, Image, Color, Video
 # shape.rotate_img()
 
 # Color Transformation
-color = Color()
+# color = Color()
 # color.color_transform()
 # Histogram
 # color.histogram()
@@ -23,5 +23,8 @@ color = Color()
 # color.image_threshold()
 
 
-video = Video()
-video.img_to_video()
+# video = Video()
+# video.img_to_video()
+
+detection = Detection()
+detection.image_face_detection()

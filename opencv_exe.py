@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 import glob
+import  sys
+import  os
 
 img = cv.imread("assets/robot.jpeg")
 height, width = img.shape[:2]
@@ -143,7 +145,6 @@ class Color:
             plt.xticks([]), plt.yticks([])
         plt.show()
 
-import cv2 as cv
 
 class Video:
     @staticmethod
@@ -168,7 +169,6 @@ class Video:
         cam.release()
         cv.destroyAllWindows()
 
-    @staticmethod
     @staticmethod
     def img_to_video():
         # Step 1: Load all PNG images from the folder (sorted by filename order)
@@ -207,3 +207,62 @@ class Video:
         # Step 6: Release video writer
         out.release()
         print("Video saved as output.avi")
+
+
+class Detection:
+    @staticmethod
+    def image_face_detection():
+        # The name of the folder containing the images
+        IMAGE_FOLDER = 'assets/images'
+
+        # Get the image filename from command line arguments
+        # If no filename is given, use a default one
+        try:
+            image_filename = sys.argv[1]
+        except IndexError:
+            image_filename = 'people-2.jpg'
+
+        # Construct the full path to the image
+        image_path = os.path.join(IMAGE_FOLDER, image_filename)
+
+        # Path to the pre-trained Haar Cascade XML file in the root folder
+        cascade_path = 'haarcascade_frontalface_default.xml'
+
+        # Create the Haar Cascade classifier
+        face_cascade = cv.CascadeClassifier(cascade_path)
+
+        # Read the image from the constructed path
+        image = cv.imread(image_path)
+
+        # Check if the image and classifier were loaded correctly
+        if image is None:
+            print(f"❌ Error: Could not load image from path: {image_path}")
+            print("Please ensure the file exists and the path is correct.")
+            sys.exit()
+        if face_cascade.empty():
+            print(f"❌ Error: Could not load face cascade from path: {cascade_path}")
+            print("Please ensure 'haarcascade_frontalface_default.xml' is in the root project folder.")
+            sys.exit()
+
+        # Convert the image to grayscale for the detector
+        gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+
+        # Perform the face detection
+        faces = face_cascade.detectMultiScale(
+            gray_image,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30)
+        )
+        print(f"✅ Found {len(faces)} faces in '{image_filename}'!")
+
+        # Loop over the found faces and draw a green rectangle around each one
+        for (x, y, w, h) in faces:
+            cv.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        # Display the final image in a window
+        cv.imshow("Faces Detected", image)
+
+        # Wait for a key press to close the window
+        cv.waitKey(0)
+        cv.destroyAllWindows()
